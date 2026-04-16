@@ -2,8 +2,7 @@ trigger:
 - main
 
 pool:
-  vmImage: Default
-  name: Default
+  vmImage: ubuntu-latest
 
 stages:
 - stage: Build
@@ -39,6 +38,3 @@ stages:
         npm install -g sonarqube-scanner
         sonar-scanner -Dsonar.token=$(SONAR_TOKEN)
       displayName: Run SonarQube Analysis
-
-  ##CD PIPELINE
-
