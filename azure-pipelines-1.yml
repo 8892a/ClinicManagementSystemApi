@@ -1,40 +1,54 @@
-trigger:
-- main
+trigger: none
 
 pool:
   name: Default
 
 stages:
-- stage: Build
-  displayName: Build Stage
+
+- stage: Deliver
+  displayName: Deliver Artifact
   jobs:
-  - job: BuildJob
-    displayName: Build Job
+  - job: DeliverJob
     steps:
-    - checkout: self
-      fetchDepth: 0
+    - script: echo "Releasing artifact (mock deliver step)"
+      displayName: Deliver Step
 
-    - task: UseNode@1
-      inputs:
-        version: '18.x'
-      displayName: Install Node.js
 
-    - script: npm install
-      displayName: Install Dependencies
+- stage: Dev
+  displayName: Deploy to Dev
+  dependsOn: Deliver
+  jobs:
+  - job: DevDeploy
+    steps:
+    - script: echo "Deploying to DEV environment (mock)"
+      displayName: Dev Deploy
 
-    - script: npm run build
-      displayName: Build Application
 
-    - script: npm test
-      displayName: Run Unit Tests with Coverage
+- stage: QAT
+  displayName: Deploy to QAT
+  dependsOn: Dev
+  jobs:
+  - job: QATDeploy
+    steps:
+    - script: echo "Deploying to QAT environment (mock)"
+      displayName: QAT Deploy
 
-    - task: PublishCodeCoverageResults@2
-      inputs:
-        summaryFileLocation: 'coverage/cobertura-coverage.xml'
-        pathToSources: '$(System.DefaultWorkingDirectory)'
-      displayName: Publish Code Coverage
 
-    - script: |
-        npm install -g sonarqube-scanner
-        sonar-scanner -Dsonar.token=$(SONAR_TOKEN)
-      displayName: Run SonarQube Analysis
+- stage: Staging
+  displayName: Deploy to Staging
+  dependsOn: QAT
+  jobs:
+  - job: StagingDeploy
+    steps:
+    - script: echo "Deploying to STAGING environment (mock)"
+      displayName: Staging Deploy
+
+
+- stage: Production
+  displayName: Deploy to Production
+  dependsOn: Staging
+  jobs:
+  - job: ProdDeploy
+    steps:
+    - script: echo "Deploying to PRODUCTION environment (mock)"
+      displayName: Prod Deploy
