@@ -12,7 +12,6 @@ stages:
 
     - script: |
         echo "Creating artifact folder..."
-        mkdir $(Build.ArtifactStagingDirectory)
         echo "DevOps Artifact" > $(Build.ArtifactStagingDirectory)/app.txt
       displayName: Create Artifact
 
