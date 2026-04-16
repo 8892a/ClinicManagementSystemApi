@@ -5,30 +5,28 @@ pool:
 
 stages:
 
-- stage: Deliver
-  displayName: Deliver Artifact
+- stage: Build
   jobs:
-  - job: DeliverJob
+  - job: BuildJob
     steps:
 
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        buildType: 'current'
-        downloadType: 'single'
-        artifactName: 'drop'
-        downloadPath: '$(Pipeline.Workspace)'
-      continueOnError: true
-      displayName: Download CI Artifact
-
     - script: |
-        echo "Artifact download attempted"
-        echo "Continuing CD pipeline"
-      displayName: Deliver Step
+        echo "Creating artifact folder..."
+        mkdir $(Build.ArtifactStagingDirectory)
+        echo "DevOps Artifact" > $(Build.ArtifactStagingDirectory)/app.txt
+      displayName: Create Artifact
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+      displayName: Publish Artifact
 
 
 - stage: Dev
   displayName: Deploy to Dev
-  dependsOn: Deliver
+  dependsOn: Build
   jobs:
   - job: DevDeploy
     steps:
@@ -63,4 +61,4 @@ stages:
   - job: ProdDeploy
     steps:
     - script: echo "Deploying to PRODUCTION environment (mock)"
-      displayName: Prod Deploy
+      displayName: Deploying
