@@ -1,0 +1,40 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Build
+  displayName: Build Stage
+  jobs:
+  - job: BuildJob
+    displayName: Build Job
+    steps:
+    - checkout: self
+      fetchDepth: 0
+
+    - task: UseNode@1
+      inputs:
+        version: '18.x'
+      displayName: Install Node.js
+
+    - script: npm install
+      displayName: Install Dependencies
+
+    - script: npm run build
+      displayName: Build Application
+
+    - script: npm test
+      displayName: Run Unit Tests with Coverage
+
+    - task: PublishCodeCoverageResults@2
+      inputs:
+        summaryFileLocation: 'coverage/cobertura-coverage.xml'
+        pathToSources: '$(System.DefaultWorkingDirectory)'
+      displayName: Publish Code Coverage
+
+    - script: |
+        npm install -g sonarqube-scanner
+        sonar-scanner -Dsonar.token=$(SONAR_TOKEN)
+      displayName: Run SonarQube Analysis
