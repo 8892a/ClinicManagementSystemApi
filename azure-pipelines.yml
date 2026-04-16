@@ -19,6 +19,7 @@ stages:
         echo "Hello DevOps Build" > $(Build.ArtifactStagingDirectory)/app.txt
       displayName: "Build Step"
 
+
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
