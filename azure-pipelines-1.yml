@@ -10,7 +10,22 @@ stages:
   jobs:
   - job: DeliverJob
     steps:
-    - script: echo "Releasing artifact (mock deliver step)"
+
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'specific'
+        project: 'Final Project'
+        pipeline: 'CD'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        artifactName: 'drop'
+        downloadPath: '$(Pipeline.Workspace)'
+      continueOnError: true
+      displayName: Download CI Artifact
+
+    - script: |
+        echo "Artifact download attempted"
+        echo "If artifact exists, it is in: $(Pipeline.Workspace)"
       displayName: Deliver Step
 
 
