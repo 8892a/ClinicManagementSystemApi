@@ -13,10 +13,7 @@ stages:
 
     - task: DownloadBuildArtifacts@0
       inputs:
-        buildType: 'specific'
-        project: 'Final Project'
-        pipeline: 'CD'
-        buildVersionToDownload: 'latest'
+        buildType: 'current'
         downloadType: 'single'
         artifactName: 'drop'
         downloadPath: '$(Pipeline.Workspace)'
@@ -25,7 +22,7 @@ stages:
 
     - script: |
         echo "Artifact download attempted"
-        echo "If artifact exists, it is in: $(Pipeline.Workspace)"
+        echo "Continuing CD pipeline"
       displayName: Deliver Step
 
 
