@@ -4,24 +4,59 @@ trigger:
 pool:
   name: Default
 
+
 stages:
 
-- stage: Deliver
+- stage: CI
+  displayName: CI Build
   jobs:
-  - job: BuildAndPublish
+  - job: BuildJob
+    displayName: Build and Test
     steps:
 
-    - script: echo "Pipeline started"
+    - checkout: self
+      clean: true
+
+    - script: echo "Starting build..."
+      displayName: Build Step
 
     - script: |
-        echo "Starting build..."
         mkdir -p $(Build.ArtifactStagingDirectory)
         echo "Hello DevOps Build" > $(Build.ArtifactStagingDirectory)/app.txt
-      displayName: "Build Step"
-
+      displayName: Create Artifact
 
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
-      displayName: "Publish Artifact"
+      displayName: Publish Artifact
+
+
+- stage: CD
+  displayName: Continuous Delivery
+  dependsOn: CI
+  jobs:
+
+  - job: DeployDev
+    displayName: Deploy to Dev
+    steps:
+    - script: echo "Deploying to DEV environment"
+      displayName: Dev Deploy
+
+  - job: DeployQAT
+    displayName: Deploy to QAT
+    steps:
+    - script: echo "Deploying to QAT environment"
+      displayName: QAT Deploy
+
+  - job: DeployStaging
+    displayName: Deploy to Staging
+    steps:
+    - script: echo "Deploying to STAGING"
+      displayName: Staging Deploy
+
+  - job: DeployProd
+    displayName: Deploy to Production
+    steps:
+    - script: echo "Deploying to PRODUCTION"
+      displayName: Prod Deploy
