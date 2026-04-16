@@ -2,61 +2,43 @@ trigger:
 - main
 
 pool:
+  vmImage: Default
   name: Default
 
-
 stages:
-
-- stage: CI
-  displayName: CI Build
+- stage: Build
+  displayName: Build Stage
   jobs:
   - job: BuildJob
-    displayName: Build and Test
+    displayName: Build Job
     steps:
-
     - checkout: self
-      clean: true
+      fetchDepth: 0
 
-    - script: echo "Starting build..."
-      displayName: Build Step
+    - task: UseNode@1
+      inputs:
+        version: '18.x'
+      displayName: Install Node.js
+
+    - script: npm install
+      displayName: Install Dependencies
+
+    - script: npm run build
+      displayName: Build Application
+
+    - script: npm test
+      displayName: Run Unit Tests with Coverage
+
+    - task: PublishCodeCoverageResults@2
+      inputs:
+        summaryFileLocation: 'coverage/cobertura-coverage.xml'
+        pathToSources: '$(System.DefaultWorkingDirectory)'
+      displayName: Publish Code Coverage
 
     - script: |
-        mkdir -p $(Build.ArtifactStagingDirectory)
-        echo "Hello DevOps Build" > $(Build.ArtifactStagingDirectory)/app.txt
-      displayName: Create Artifact
+        npm install -g sonarqube-scanner
+        sonar-scanner -Dsonar.token=$(SONAR_TOKEN)
+      displayName: Run SonarQube Analysis
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'drop'
-      displayName: Publish Artifact
+  ##CD PIPELINE
 
-
-- stage: CD
-  displayName: Continuous Delivery
-  dependsOn: CI
-  jobs:
-
-  - job: DeployDev
-    displayName: Deploy to Dev
-    steps:
-    - script: echo "Deploying to DEV environment"
-      displayName: Dev Deploy
-
-  - job: DeployQAT
-    displayName: Deploy to QAT
-    steps:
-    - script: echo "Deploying to QAT environment"
-      displayName: QAT Deploy
-
-  - job: DeployStaging
-    displayName: Deploy to Staging
-    steps:
-    - script: echo "Deploying to STAGING"
-      displayName: Staging Deploy
-
-  - job: DeployProd
-    displayName: Deploy to Production
-    steps:
-    - script: echo "Deploying to PRODUCTION"
-      displayName: Prod Deploy
